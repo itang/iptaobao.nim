@@ -25,10 +25,13 @@ const RestApiUrlPrefix* = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
 proc getIpInfo*(ip: string, timeout = 5 * 1000): TRet =
   try:
-    let content = httpclient.getContent(url = RestApiUrlPrefix & ip, timeout = timeout)
-    let jcontent = json.parseJson(content)
-    let data = jcontent["data"]
-    if jcontent["code"].num == 0:
+    let
+      url = RestApiUrlPrefix & ip
+      content  = httpclient.getContent(url, timeout = timeout)
+      jcontent = json.parseJson(content)
+      data     = jcontent["data"]
+      code     = jcontent["code"].num
+    if code == 0:
       result.ipInfo = (countryId: data["country_id"].str,
                        country:   data["country"].str,
                        area:      data["area"].str,

@@ -1,0 +1,6 @@
+[Package]
+name          = "iptaobao"
+version       = "0.1.0"
+author        = "itang"
+description   = "Nimrod wrapper for ip.taobao.com."
+license       = "MIT"

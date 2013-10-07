@@ -6,50 +6,37 @@ discard """
 import json, httpclient #, sockets
 
 type
-  TIpInfo* = tuple
-    countryId: string
-    country:   string
-    area:      string
-    areaId:    string
-    region:    string
-    regionId:  string
-    city:      string
-    cityId:    string
-    isp:       string
-    ispId:     string
-    ip:        string
+  TIpInfo* = tuple[countryId: string, country: string,
+                   area: string, areaId: string,
+                   region: string, regionId: string,
+                   city: string, cityId: string,
+                   isp: string, ispId: string, ip: string]
 
-  TRet* = tuple[ipInfo: TIpInfo, err: string]
+  TRet*    = tuple[ipInfo: TIpInfo, err: string]
 
-const
-  RestApiUrlPrefix* = "http://ip.taobao.com/service/getIpInfo.php?ip="
+const RestApiUrlPrefix* = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
-proc getIpInfo*(ip: string, timeout = 5 * 1000): TRet =
+proc getIpInfo*(ip: string, timeout = 5000): TRet =
   try:
-    let
-      url      = RestApiUrlPrefix & ip
-      content  = httpclient.getContent(url, timeout = timeout)
-      jcontent = json.parseJson(content)
-      data     = jcontent["data"]
-      code     = jcontent["code"].num
+    let jcontent      = httpclient.getContent(RestApiUrlPrefix & ip,
+                                              timeout = timeout).parseJson()
+    let (code, jdata) = (jcontent["code"].num, jcontent["data"])
     if code == 0:
-      result.ipInfo = (countryId: data["country_id"].str,
-                       country:   data["country"].str,
-                       area:      data["area"].str,
-                       areaId:    data["area_id"].str,
-                       region:    data["region"].str,
-                       regionId:  data["region_id"].str,
-                       city:      data["city"].str,
-                       cityId:    data["city_id"].str,
-                       isp:       data["isp"].str,
-                       ispId:     data["isp_id"].str,
-                       ip:        data["ip"].str)
+      result.ipInfo = (countryId: jdata["country_id"].str,
+                       country:   jdata["country"].str,
+                       area:      jdata["area"].str,
+                       areaId:    jdata["area_id"].str,
+                       region:    jdata["region"].str,
+                       regionId:  jdata["region_id"].str,
+                       city:      jdata["city"].str,
+                       cityId:    jdata["city_id"].str,
+                       isp:       jdata["isp"].str,
+                       ispId:     jdata["isp_id"].str,
+                       ip:        jdata["ip"].str)
     else:
-      result.err = data.str
+      result.err = jdata.str
   except:
-    let
-      e   = getCurrentException()
-      msg = getCurrentExceptionMsg()
+    let (e, msg) = (getCurrentException(), getCurrentExceptionMsg())
     result.err = "Got exception " & repr(e) & " with message " & msg
 
 when isMainModule:

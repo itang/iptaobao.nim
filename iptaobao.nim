@@ -21,12 +21,13 @@ type
 
   TRet* = tuple[ipInfo: TIpInfo, err: string]
 
-const RestApiUrlPrefix* = "http://ip.taobao.com/service/getIpInfo.php?ip="
+const
+  RestApiUrlPrefix* = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
 proc getIpInfo*(ip: string, timeout = 5 * 1000): TRet =
   try:
     let
-      url = RestApiUrlPrefix & ip
+      url      = RestApiUrlPrefix & ip
       content  = httpclient.getContent(url, timeout = timeout)
       jcontent = json.parseJson(content)
       data     = jcontent["data"]
@@ -47,7 +48,7 @@ proc getIpInfo*(ip: string, timeout = 5 * 1000): TRet =
       result.err = data.str
   except:
     let
-      e = getCurrentException()
+      e   = getCurrentException()
       msg = getCurrentExceptionMsg()
     result.err = "Got exception " & repr(e) & " with message " & msg
 
